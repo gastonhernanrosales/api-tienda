@@ -18,7 +18,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173") // URL del frontend
+            policy.WithOrigins() 
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -89,9 +89,11 @@ builder.Services.AddControllers()
        // options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
     }
 
-
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000"; // Puerto por defecto si no está en Render
+builder.WebHost.UseUrls($"http://*:{port}");
 var app = builder.Build();
 // 2. Usamos la política de CORS antes de MapControllers
+
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
