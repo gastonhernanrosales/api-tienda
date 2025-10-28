@@ -1,0 +1,31 @@
+# Visual Studio / .NET
+bin/
+obj/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Rider
+.idea/
+
+# dotnet
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Logs
+*.log
+
+# EF Core migrations snapshot build outputs
+**/Migrations/**/Snapshot*
+
+# user secrets (don't track)
+secrets.json
+appsettings.*.json
+
+# OS files
+.DS_Store
+Thumbs.db
