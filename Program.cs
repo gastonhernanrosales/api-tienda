@@ -18,14 +18,23 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins() 
+            policy.WithOrigins("https://tu-frontend.onrender.com") 
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
 });
+// 🔹 Configurar JWT de forma segura
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrEmpty(jwtKey))
+{
+    throw new InvalidOperationException(
+        "La clave JWT no está configurada. " +
+        "Agregala en appsettings.json o como variable de entorno 'Jwt__Key'."
+    );
+}
 
 // Configurar JWT
-var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
+var key = Encoding.UTF8.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication(options =>
 {
