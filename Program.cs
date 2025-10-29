@@ -18,7 +18,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("https://tu-frontend.onrender.com") 
+            policy.WithOrigins() 
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
