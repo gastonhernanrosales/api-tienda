@@ -12,7 +12,6 @@ builder.Services.AddDbContext<MyDbContext>(options =>
 
     )
 );
-// 1. Agregamos el servicio de CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
