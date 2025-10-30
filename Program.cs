@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.AllowAnyOrigin()
+            policy.WithOrigins("https://mi-frontend-gjwc.onrender.com")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
