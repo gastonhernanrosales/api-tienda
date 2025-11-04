@@ -5,36 +5,35 @@ using System.Text;
 using WebTonyWilly.Data;
 
 var builder = WebApplication.CreateBuilder(args);
-// 🔹 Registramos el DbContext con MySQL
-builder.Services.AddDbContext<MyDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
 
-    )
+// ✅ Puerto dinámico para Render
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
+// 🔹 Registramos el DbContext con PostgreSQL
+builder.Services.AddDbContext<MyDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+// 🔹 CORS para frontend de Render
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
-        policy =>
-        {
-            policy.WithOrigins("https://mi-frontend-gjwc.onrender.com")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("https://mi-frontend-gjwc.onrender.com")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
 });
-// 🔹 Configurar JWT de forma segura
+
+// 🔹 Configurar JWT
 var jwtKey = builder.Configuration["Jwt:Key"];
 if (string.IsNullOrEmpty(jwtKey))
 {
-    throw new InvalidOperationException(
-        "La clave JWT no está configurada. " +
-        "Agregala en appsettings.json o como variable de entorno 'Jwt__Key'."
-    );
+    throw new InvalidOperationException("La clave JWT no está configurada correctamente.");
 }
 
-// Configurar JWT
 var key = Encoding.UTF8.GetBytes(jwtKey);
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -59,12 +58,12 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-// 🔹 Configurar Swagger con JWT
+
+// 🔹 Swagger con soporte JWT
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "WebTonyWilly API", Version = "v1" });
 
-    // Configuración para que Swagger acepte el token
     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Description = "Introduce el token JWT con el prefijo Bearer. Ejemplo: 'Bearer 12345abcdef'",
@@ -89,35 +88,18 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-builder.Services.AddControllers()
-    .AddJsonOptions(x =>
-        x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);//options =>
-{
 
-       // options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-    }
-
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5000"; // Puerto por defecto si no está en Render
-builder.WebHost.UseUrls($"http://*:{port}");
 var app = builder.Build();
-// 2. Usamos la política de CORS antes de MapControllers
+
+// ✅ Importante: Swagger también en producción
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
-
 app.UseAuthorization();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-
 
 app.MapControllers();
 
 app.Run();
-
