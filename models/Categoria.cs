@@ -1,4 +1,6 @@
-﻿namespace WebTonyWilly.models
+﻿using System.Text.Json.Serialization;
+
+namespace WebTonyWilly.models
 {
     public class Categoria
     {
