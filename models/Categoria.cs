@@ -6,6 +6,7 @@
         public string Nombre { get; set; } = string.Empty;
 
         // Relación: una categoría tiene muchos productos
+        [JsonIgnore]
         public ICollection<Producto> Productos { get; set; } = new List<Producto>();
     }
 }
