@@ -17,6 +17,8 @@ namespace WebTonyWilly.Data
         public DbSet<Venta> Ventas { get; set; }
         public DbSet<VentaDetalle> VentaDetalles { get; set; }
         public DbSet<Categoria> Categoria { get; set; }
+        public DbSet<Turno> Turnos { get; set; }
+
 
 
     }
