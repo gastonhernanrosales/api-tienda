@@ -16,7 +16,9 @@
 
         // Fondo inicial (la plata de arranque)
         public decimal FondoInicial { get; set; }
-
+        // Totales del turno
+        public decimal? TotalEfectivo { get; set; }
+        public decimal? TotalMP { get; set; }
         // Efectivo final contado por el cajero
         public decimal? EfectivoFinal { get; set; }
 

@@ -228,6 +228,23 @@ namespace WebTonyWilly.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
-        
+        // 🔥 Obtener ventas de un usuario dentro de un turno
+        [HttpGet("GetByUserAndTurno")]
+        public async Task<IActionResult> GetVentasByUserAndTurno(
+            int userId,
+            DateTime desde,
+            DateTime hasta)
+        {
+            var ventas = await _context.Ventas
+                .Include(v => v.Detalles)
+                .ThenInclude(d => d.Producto)
+                .Where(v => v.UsuarioId == userId &&
+                            v.Fecha >= desde &&
+                            v.Fecha <= hasta)
+                .ToListAsync();
+
+            return Ok(ventas);
+        }
+
     }
 }
