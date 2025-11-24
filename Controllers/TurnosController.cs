@@ -117,6 +117,17 @@ namespace WebTonyWilly.Controllers
 
             return Ok(turno);
         }
+        // 4️⃣ LISTAR TODOS LOS TURNOS
+        // ---------------------------
+        [HttpGet]
+        public async Task<IActionResult> GetTodos()
+        {
+            var turnos = await _context.Turnos
+                .Include(t => t.Usuario) // para traer nombre del usuario
+                .ToListAsync();
+
+            return Ok(turnos);
+        }
     }
 }
 
