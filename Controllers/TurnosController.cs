@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebTonyWilly.Data;
+using WebTonyWilly.Dtos;
 using WebTonyWilly.models;
 
 namespace WebTonyWilly.Controllers
@@ -20,22 +21,29 @@ namespace WebTonyWilly.Controllers
         // 1️⃣ ABRIR TURNO
         // ---------------------------
         [HttpPost("abrir")]
-        public async Task<IActionResult> AbrirTurno([FromBody] Turno dto)
+        public async Task<IActionResult> AbrirTurno([FromBody] TurnosCreateDto dto)
         {
-            // Validar si el usuario YA tiene un turno abierto
+            Console.WriteLine("UsuarioId recibido: " + dto.UsuarioId);
+            Console.WriteLine("FondoInicial recibido: " + dto.FondoInicial);
+
             bool abierto = await _context.Turnos.AnyAsync(t =>
                 t.UsuarioId == dto.UsuarioId && !t.EstaCerrado);
 
             if (abierto)
                 return BadRequest("Ya tenés un turno abierto.");
 
-            dto.Inicio = DateTime.UtcNow;
-            dto.EstaCerrado = false;
+            var turno = new Turno
+            {
+                UsuarioId = dto.UsuarioId,
+                FondoInicial = dto.FondoInicial,
+                Inicio = DateTime.UtcNow,
+                EstaCerrado = false
+            };
 
-            _context.Turnos.Add(dto);
+            _context.Turnos.Add(turno);
             await _context.SaveChangesAsync();
 
-            return Ok(dto);
+            return Ok(turno);
         }
         //  CERRAR TURNO (FINAL VERSION)
         // ---------------------------
