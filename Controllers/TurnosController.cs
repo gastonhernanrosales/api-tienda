@@ -37,7 +37,14 @@ namespace WebTonyWilly.Controllers
                 UsuarioId = dto.UsuarioId,
                 FondoInicial = dto.FondoInicial,
                 Inicio = DateTime.UtcNow,
-                EstaCerrado = false
+                EstaCerrado = false,
+
+                // 🔥 INICIALIZACIÓN NECESARIA 🔥
+                TotalEfectivo = 0,
+                TotalMP = 0,
+                EfectivoFinal = 0,
+                EfectivoEsperado = dto.FondoInicial,
+                Diferencia = 0
             };
 
             _context.Turnos.Add(turno);
@@ -127,6 +134,65 @@ namespace WebTonyWilly.Controllers
                 .ToListAsync();
 
             return Ok(turnos);
+        }
+        //   GET DETALLE COMPLETO DEL TURNO
+        // ---------------------------------------------
+        [HttpGet("detalle/{turnoId}")]
+        public async Task<IActionResult> GetDetalleTurno(int turnoId)
+        {
+            var turno = await _context.Turnos
+                .Include(t => t.Usuario)
+                .FirstOrDefaultAsync(t => t.Id == turnoId);
+
+            if (turno == null)
+                return NotFound("Turno no encontrado.");
+
+            // Traer ventas dentro del rango
+            var ventas = await _context.Ventas
+                .Where(v =>
+                    v.UsuarioId == turno.UsuarioId &&
+                    v.Fecha >= turno.Inicio &&
+                    (turno.Cierre == null || v.Fecha <= turno.Cierre) &&
+                    v.Estado != "cancelada"
+                )
+                .ToListAsync();
+
+            // Totales por método de pago
+            var totalEfectivo = ventas
+                .Where(v => v.MetodoPago.ToLower() == "efectivo")
+                .Sum(v => v.Total);
+
+            var totalMp = ventas
+                .Where(v => v.MetodoPago.ToLower() == "mercadopago")
+                .Sum(v => v.Total);
+
+            var totalTarjeta = ventas
+                .Where(v => v.MetodoPago.ToLower() == "tarjeta")
+                .Sum(v => v.Total);
+
+            // Efectivo esperado
+            decimal efectivoEsperado = turno.FondoInicial + totalEfectivo;
+
+            return Ok(new
+            {
+                turno.Id,
+                Cajero = turno.Usuario?.Nombre,
+                Inicio = turno.Inicio,
+                Fin = turno.Cierre,
+                turno.FondoInicial,
+                TotalEfectivo = totalEfectivo,
+                TotalMP = totalMp,
+                TotalTarjeta = totalTarjeta,
+                EfectivoEsperado = efectivoEsperado,
+                turno.EfectivoFinal,
+                turno.Diferencia,
+                Ventas = ventas.Select(v => new {
+                    v.Id,
+                    v.Total,
+                    v.MetodoPago,
+                    v.Fecha
+                })
+            });
         }
     }
 }
