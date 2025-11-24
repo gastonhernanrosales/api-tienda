@@ -149,6 +149,8 @@ namespace WebTonyWilly.Controllers
 
             // Traer ventas dentro del rango
             var ventas = await _context.Ventas
+                .Include(v => v.Detalles)
+                    .ThenInclude(d => d.Producto)
                 .Where(v =>
                     v.UsuarioId == turno.UsuarioId &&
                     v.Fecha >= turno.Inicio &&
@@ -190,7 +192,14 @@ namespace WebTonyWilly.Controllers
                     v.Id,
                     v.Total,
                     v.MetodoPago,
-                    v.Fecha
+                    v.Fecha,
+                    Items = v.Detalles.Select(d => new {
+                        d.Producto.Nombre,
+                        d.Cantidad,
+                        Precio = d.PrecioUnitario,
+                        Subtotal = d.Cantidad * d.PrecioUnitario
+                    })
+
                 })
             });
         }
