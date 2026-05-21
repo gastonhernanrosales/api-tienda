@@ -52,8 +52,19 @@ namespace WebTonyWilly.Services
 
             using var doc = JsonDocument.Parse(json);
 
-            return doc.RootElement
-                .GetProperty("choices")[0]
+            // 🔥 Si OpenAI devuelve error
+            if (!response.IsSuccessStatusCode)
+            {
+                return $"Error OpenAI: {json}";
+            }
+
+            // 🔥 Verificar si existe choices
+            if (!doc.RootElement.TryGetProperty("choices", out var choices))
+            {
+                return "La IA no devolvió respuestas.";
+            }
+
+            return choices[0]
                 .GetProperty("message")
                 .GetProperty("content")
                 .GetString();
