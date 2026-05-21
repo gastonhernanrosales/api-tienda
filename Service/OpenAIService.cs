@@ -11,7 +11,7 @@ namespace WebTonyWilly.Services
         public OpenAIService(IConfiguration configuration)
         {
             _httpClient = new HttpClient();
-            _apiKey = configuration["OpenAI:ApiKey"];
+            _apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
         }
 
         public async Task<string> PreguntarIA(string mensaje)
