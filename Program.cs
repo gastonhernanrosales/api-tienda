@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Serialization;
 using WebTonyWilly.Data;
+using WebTonyWilly.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -94,7 +95,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-
+builder.Services.AddScoped<OpenAIService>();
 var app = builder.Build();
 
 // ✅ Importante: Swagger también en producción
