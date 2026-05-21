@@ -1,27 +1,62 @@
-﻿
-using OpenAI;
-using OpenAI.Chat;
+﻿using System.Text;
+using System.Text.Json;
 
 namespace WebTonyWilly.Services
 {
     public class OpenAIService
     {
+        private readonly HttpClient _httpClient;
         private readonly string _apiKey;
 
         public OpenAIService(IConfiguration configuration)
         {
+            _httpClient = new HttpClient();
             _apiKey = configuration["OpenAI:ApiKey"];
         }
 
         public async Task<string> PreguntarIA(string mensaje)
         {
-            var client = new OpenAIClient(_apiKey);
+            _httpClient.DefaultRequestHeaders.Clear();
 
-            var chat = client.GetChatClient("gpt-4o-mini");
+            _httpClient.DefaultRequestHeaders.Add("Authorization",
+                $"Bearer {_apiKey}");
 
-            var response = await chat.CompleteChatAsync(mensaje);
+            var body = new
+            {
+                model = "gpt-4o-mini",
+                messages = new[]
+                {
+                    new
+                    {
+                        role = "user",
+                        content = mensaje
+                    }
+                },
+                max_tokens = 200
+            };
 
-            return response.Value.Content[0].Text;
+            var content = new StringContent(
+                JsonSerializer.Serialize(body),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var response = await _httpClient.PostAsync(
+                "https://api.openai.com/v1/chat/completions",
+                content
+            );
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine(json);
+
+            using var doc = JsonDocument.Parse(json);
+
+            return doc.RootElement
+                .GetProperty("choices")[0]
+                .GetProperty("message")
+                .GetProperty("content")
+                .GetString();
         }
     }
 }
