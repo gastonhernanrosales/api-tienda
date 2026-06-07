@@ -95,7 +95,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-builder.Services.AddScoped<OpenAIService>();
+builder.Services.AddScoped<GeminiService>();
 var app = builder.Build();
 
 // ✅ Importante: Swagger también en producción

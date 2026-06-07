@@ -7,17 +7,18 @@ namespace WebTonyWilly.Controllers
     [ApiController]
     public class IAController : ControllerBase
     {
-        private readonly OpenAIService _openAIService;
 
-        public IAController(OpenAIService openAIService)
+        
+        private readonly GeminiService _geminiService;
+        public IAController(GeminiService geminiService)
         {
-            _openAIService = openAIService;
+            _geminiService = geminiService;
         }
 
         [HttpPost("chat")]
         public async Task<IActionResult> Chat([FromBody] string mensaje)
         {
-            var respuesta = await _openAIService.PreguntarIA(mensaje);
+            var respuesta = await _geminiService.PreguntarIA(mensaje);
 
             return Ok(new
             {
